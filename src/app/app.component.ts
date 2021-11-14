@@ -1,15 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import {
-  Subject,
-  takeUntil,
-  Observable,
   catchError,
-  of,
   combineLatest,
   map,
-  tap,
-  Subscription,
+  Observable,
+  of,
+  Subject,
+  takeUntil,
   takeWhile,
 } from 'rxjs';
 import { DataService } from './data.service';
@@ -37,11 +35,10 @@ export class AppComponent implements OnInit, OnDestroy {
     this.form.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => console.log(data));
-      this.setFlagOnTrue(this.dataService.getBooleans$());
+    this.setFlagOnTrue(this.dataService.getBooleans$());
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
     this.destroy$.complete();
   }
 
@@ -50,9 +47,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   setFlagOnTrue(stream$: Observable<boolean>): void {
-    stream$.pipe(takeWhile((value) => !value)).subscribe(({
-      complete: () => this.flag = true
-    }));
+    stream$.pipe(takeWhile((value) => !value)).subscribe({
+      complete: () => (this.flag = true),
+    });
+  }
+
+  combineStreams$(...streams: Observable<number[]>[]): Observable<number[]> {
+    return combineLatest(streams).pipe(map((lists) => lists.flat()));
   }
 
   getNumbers$(): Observable<number[]> {
@@ -61,9 +62,5 @@ export class AppComponent implements OnInit, OnDestroy {
       this.dataService.getNumbers2$(),
       this.dataService.getNumbers3$()
     );
-  }
-
-  combineStreams$(...streams: Observable<number[]>[]): Observable<number[]> {
-    return combineLatest(streams).pipe(map((lists) => lists.flat()));
   }
 }
