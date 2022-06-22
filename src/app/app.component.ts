@@ -1,16 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormControl } from '@angular/forms';
 import {
   catchError,
   combineLatest,
+  distinctUntilChanged,
   map,
   Observable,
   of,
   Subject,
   takeUntil,
   takeWhile,
+  debounceTime,
+  switchMap,
+  filter,
+  startWith,
+  tap
 } from 'rxjs';
 import { DataService } from './data.service';
+import { Specie, WebServerService } from './services/web-server.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +28,20 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'marble-tests';
   flag = false;
 
+  searchInput: FormControl =  new FormControl("");
+  
+  getGhibliFilms$: Observable<any> = this.searchInput.valueChanges
+    .pipe(startWith(""),debounceTime(400), distinctUntilChanged(), 
+      switchMap(val => 
+        this.WebServerService.getGhibliFilms$()
+        .pipe(map(films => films.filter((film: any) => film.title.toLowerCase().includes(val.toLowerCase()))))
+    )
+  );
+
+  getGhibliSpecies$: Observable<any> = this.WebServerService.getGhibliSpecies$();
+  trackByIdentity = (index: number, item: any) => item;
+
+
   readonly form = this.formBuilder.group({
     name: [],
   });
@@ -28,7 +49,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    private readonly dataService: DataService
+    private readonly dataService: DataService,
+    private readonly WebServerService: WebServerService
   ) {}
 
   ngOnInit(): void {
@@ -37,6 +59,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe((data) => console.log(data));
     this.setFlagOnTrue(this.dataService.getBooleans$());
   }
+
 
   ngOnDestroy(): void {
     this.destroy$.complete();

@@ -9,3 +9,65 @@
 <pre>{{ getNumbers$() | async | json }}</pre>
 
 <pre>FLAG: {{ flag }}</pre>
+
+<input type="text" [formControl]="searchInput">
+<ng-container *ngIf="getGhibliFilms$ | async as ghibliFilms">
+  <!-- <pre>{{ghibliFilms | json }}</pre> -->
+
+  <app-dynamic-table [tableData]="ghibliFilms"></app-dynamic-table>
+  <!-- <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Producer</th>
+        <th>Image</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let film of ghibliFilms; trackBy: trackByIdentity">
+        <td>
+          {{film.title}}
+        </td>
+        <td>
+          {{film.producer}}
+        </td>
+        <td>
+          <img [src]="film.image" width="100px" alt="">
+        </td>
+        
+      </tr>
+    </tbody>
+  </table>  
+   -->
+</ng-container>
+
+<ng-container *ngIf="(getGhibliSpecies$ | async ) as ghibliSpecie">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Classification</th>
+        <th>Eye Colors</th>
+        <th>Hair Colors</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let specie of (ghibliSpecie  | customfilter: 'name' : searchInput.value); trackBy: trackByIdentity">
+        <td>
+          {{specie.name}}
+        </td>
+        <td>
+          {{specie.classification}}
+        </td>
+        <td>
+          {{specie.eye_colors}}
+        </td>
+        <td>
+          {{specie.hair_colors}}
+        </td>
+      </tr>
+    </tbody>
+  </table>  
+</ng-container>
+
